@@ -1,0 +1,945 @@
+[
+    {
+        "id": "e46b79e5.cc0948",
+        "type": "tab",
+        "label": "Amber and Tesla",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e7d1635c.d8d1c",
+        "type": "inject",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 110,
+        "y": 80,
+        "wires": [
+            [
+                "24d0d3d7.6b95ac"
+            ]
+        ]
+    },
+    {
+        "id": "2849e40d.e92d8c",
+        "type": "comment",
+        "z": "e46b79e5.cc0948",
+        "name": "Set ToU Pricing",
+        "info": "",
+        "x": 140,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "24d0d3d7.6b95ac",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Prices",
+        "func": "// Carbon Neutral Cost\na = 0.11;\n\n// Environmental Certificate Cost\nb = 1.8425;\n\n// Market Charges\nc = 0.0715;\n\n// Price Protection Hedging\nd = 0.55;\n\n// Summer Peak 2pm - 6pm M-F 1 Dec to 31 Mar\ne = 45.6579;\n// Peak Times\nea = [14,15,16,17];\n//Peak Months\neb = [1,2,3,12];\n\n// Summer Shoulder 12pm - 2pm, 6pm - 8pm M-F 1 Dec to 31 Mar\nf = 40.3015;\nfa = [12,13,18,19];\n\n// Winter Peak 4pm - 8pm M-F 1 Jun to 31 Aug\ng = 40;\nga = [16,17,18,19];\n// Peak Month \ngb = [6,7,8];\n\n//Off Peak, all other times\nh = 4.7915;\n\n//Set Array of Pricing\ni = {};\n\n// Solar Export * % buffer\nj = 12;\n\n//Battery Charging Times\nk = [];\n\ni['Summer-Peak'] = a + b + c + d + e; \ni['Summer-Shoulder'] = a + b + c + d + f;\ni['Winter-Peak'] = a + b + c + d + g;\ni['Off-Peak'] = a + b + c + d + h;\ni['Solar-Export'] = j;\n\n\nflow.set('prices',i);\nflow.set('summer_tariff', eb);\nflow.set('winter_tariff', gb);\nflow.set('summer_tariff_peak', ea);\nflow.set('summer_tariff_shoulder', fa);\nflow.set('winter_tariff_peak', ga);\nflow.set('battery', false);\nflow.set('evcharging', k);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 380,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e0196bd5.84db78",
+        "type": "switch",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "property": "payload[0].battery",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 870,
+        "y": 520,
+        "wires": [
+            [
+                "62a050ad.94645"
+            ],
+            [
+                "fba54538.d585c8"
+            ]
+        ]
+    },
+    {
+        "id": "2a155c85.599f44",
+        "type": "stoptimer",
+        "z": "e46b79e5.cc0948",
+        "duration": "36",
+        "units": "Minute",
+        "payloadtype": "num",
+        "payloadval": "00",
+        "name": "",
+        "x": 1160,
+        "y": 602,
+        "wires": [
+            [
+                "9737ceba.e001f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9737ceba.e001f",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Battery to False after timer expired",
+        "rules": [
+            {
+                "t": "set",
+                "p": "battery",
+                "pt": "flow",
+                "to": "false",
+                "tot": "bool"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1470,
+        "y": 580,
+        "wires": [
+            [
+                "3f1cc74c.f41fb8"
+            ]
+        ]
+    },
+    {
+        "id": "23ad17f.2e010e8",
+        "type": "link out",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "links": [
+            "1af98c3f.cb6f64",
+            "e6149ee6.4d82a"
+        ],
+        "x": 1635,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "e6149ee6.4d82a",
+        "type": "link in",
+        "z": "e46b79e5.cc0948",
+        "name": "Check Prices",
+        "links": [
+            "23ad17f.2e010e8"
+        ],
+        "x": 75,
+        "y": 260,
+        "wires": [
+            [
+                "cabc0d83.c46db"
+            ]
+        ]
+    },
+    {
+        "id": "463a4939.833948",
+        "type": "debug",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1250,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "4d41d5f7.15dd5c",
+        "type": "inject",
+        "z": "e46b79e5.cc0948",
+        "name": "Check Prices",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "300",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "300",
+        "x": 140,
+        "y": 360,
+        "wires": [
+            [
+                "cabc0d83.c46db"
+            ]
+        ]
+    },
+    {
+        "id": "cabc0d83.c46db",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "set headers and change Postcode here",
+        "func": "msg.headers = {};\nmsg.headers[\"Content-Type\"] = \"application/json\";\nmsg.payload = '{ \"postcode\":\"3810\" }';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 300,
+        "y": 300,
+        "wires": [
+            [
+                "ccd6f17.551be1"
+            ]
+        ]
+    },
+    {
+        "id": "ccd6f17.551be1",
+        "type": "http request",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": false,
+        "url": "https://api.amberelectric.com.au/prices/listprices",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 350,
+        "y": 380,
+        "wires": [
+            [
+                "dbb6798.8711088"
+            ]
+        ]
+    },
+    {
+        "id": "dbb6798.8711088",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "Results",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.data.variablePricesAndRenewables",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 540,
+        "y": 380,
+        "wires": [
+            [
+                "1c2ff83b.97b008"
+            ]
+        ]
+    },
+    {
+        "id": "1c2ff83b.97b008",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Curent period to +2 hours",
+        "func": "let p = msg.payload\n\ni = 0;\nj = '';\nwhile (j != \"FORECAST\") {\n j = p[i].periodType; \n  i++;\n}\nq = [];\nk = 0;\nwhile (k < 4) {\n   \n    price = parseFloat(p[i-2].wholesaleKWHPrice);\n\n    \n    q.push({'price':price,'period_end':p[i-2].period, 'period': p[i-2].period});\n    i++; k++;\n}\n\nmsg.payload = q;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 340,
+        "wires": [
+            [
+                "3392a644.d8cf9a"
+            ]
+        ]
+    },
+    {
+        "id": "3392a644.d8cf9a",
+        "type": "split",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 130,
+        "y": 460,
+        "wires": [
+            [
+                "91de777d.349f28"
+            ]
+        ]
+    },
+    {
+        "id": "91de777d.349f28",
+        "type": "moment",
+        "z": "e46b79e5.cc0948",
+        "name": "Get month, hour and day",
+        "topic": "",
+        "input": "payload.period",
+        "inputType": "msg",
+        "inTz": "Australia/Melbourne",
+        "adjAmount": "30",
+        "adjType": "minutes",
+        "adjDir": "subtract",
+        "format": "M,HH,e",
+        "locale": "C",
+        "output": "payload.tariff",
+        "outputType": "msg",
+        "outTz": "Australia/Melbourne",
+        "x": 310,
+        "y": 460,
+        "wires": [
+            [
+                "91e6f199.22aa6"
+            ]
+        ]
+    },
+    {
+        "id": "6d648f9e.e2bab",
+        "type": "join",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "mode": "auto",
+        "build": "string",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 710,
+        "y": 462,
+        "wires": [
+            [
+                "7cd1cf01.59c17"
+            ]
+        ]
+    },
+    {
+        "id": "7cd1cf01.59c17",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Join The Network Cost",
+        "func": "prices = flow.get('prices');\nlet p = msg.payload\n\ni = 0;\nq = [];\nwhile (i < 4) {\n \n battery = false;\n    price = (p[i].price * 1.1) + p[i].tariff_price;\n    if (price > prices['Solar-Export']/0.85 ) {\n        if (  p[i].evboost === false) {\n            battery = true;\n       // flow.set('battery',true);\n    } }\n  q.push({'price':price.toFixed(2),'battery':battery,'period_end':p[i].period_end});\n  i++; \n  \n}\n\nif (q[0].battery === true) {\n   flow.set('battery',true); \n}\n    \n\n   \n\n//flow.set('battery',true);\nmsg.payload = q;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 900,
+        "y": 460,
+        "wires": [
+            [
+                "e0196bd5.84db78"
+            ]
+        ]
+    },
+    {
+        "id": "ae92a17e.a13fa",
+        "type": "comment",
+        "z": "e46b79e5.cc0948",
+        "name": "Check Wholesale Prices Every 5 Mins with ToU",
+        "info": "If price is above FiT then activate battery.\n\nWait 30 Minutes from last true vale then set to false.",
+        "x": 220,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "a8b36ef6.381f9",
+        "type": "inject",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Battery Flase",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 1200,
+        "y": 680,
+        "wires": [
+            [
+                "9737ceba.e001f"
+            ]
+        ]
+    },
+    {
+        "id": "cf7e8d92.ef03b",
+        "type": "link in",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "links": [
+            "fba54538.d585c8"
+        ],
+        "x": 1040,
+        "y": 360,
+        "wires": [
+            [
+                "463a4939.833948"
+            ]
+        ]
+    },
+    {
+        "id": "fba54538.d585c8",
+        "type": "link out",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "links": [
+            "b7901829.ade238",
+            "cf7e8d92.ef03b",
+            "c57930be.283da"
+        ],
+        "x": 1135,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "62a050ad.94645",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "electricity_battery",
+                "pt": "global",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 880,
+        "y": 680,
+        "wires": [
+            [
+                "2a155c85.599f44",
+                "fba54538.d585c8"
+            ]
+        ]
+    },
+    {
+        "id": "3f1cc74c.f41fb8",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "electricity_battery",
+                "pt": "global",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1660,
+        "y": 640,
+        "wires": [
+            [
+                "23ad17f.2e010e8"
+            ]
+        ]
+    },
+    {
+        "id": "91e6f199.22aa6",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Add Network Cost",
+        "func": "prices = flow.get('prices');\nsummer_tariff = flow.get('summer_tariff');\nwinter_tariff = flow.get('winter_tariff');\nsummer_tariff_peak = flow.get('summer_tariff_peak');\nsummer_tariff_shoulder = flow.get('summer_tariff_shoulder');\nwinter_tariff_peak = flow.get('winter_tariff_peak');\nevboost = flow.get('evcharging');\n\na = msg.payload.tariff.split(\",\");\nmonth = parseFloat(a[0]);\nhour = parseFloat(a[1]);\nday = parseFloat(a[2]);\n\nif (0 < day > 6) {\n    msg.payload.weekday = true;\nif ( summer_tariff.includes(month)) {\n        if  ( summer_tariff_peak.includes(hour)) {\n            price = prices['Summer-Peak'];\n            structure = \"Summer-Peak\";\n        } \n        else if ( summer_tariff_shoulder.includes(hour)) {\n            price = prices['Summer-Shoulder']; \n            structure = \"Summer-Shoulder\";\n        }\n        else {\n            price = prices['Off-Peak']; \n            structure = \"Summer-Off-Peak\";\n        }\n} \n\nelse if ( winter_tariff.includes(month)) {\n    \n        if  ( winter_tariff_peak.includes(hour)) {\n            msg.payload.tarrif = \"Winter Peak\";\n            price = prices['Winter-Peak'];\n            structure = \"Winter-Peak\";\n        } \n        else {\n            price = prices['Off-Peak'];\n            structure = \"Winter-Off-Peak\";\n        }\n}\n\nelse {\n   price = prices['Off-Peak']; \n   structure = \"Off-Peak\";\n}\n}\nelse {\n   price = prices['Off-Peak']; \n   structure = \"Off-Peak\";\n}\n\nif  ( evboost.includes(hour)) {\n            msg.payload.evboost = true;\n        } \nelse {\n        msg.payload.evboost = false;\n    }\n\nmsg.payload.tariff_price = price;\nmsg.payload.tariff_structure = structure;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 550,
+        "y": 460,
+        "wires": [
+            [
+                "6d648f9e.e2bab"
+            ]
+        ]
+    },
+    {
+        "id": "6739aba5.891ef4",
+        "type": "link in",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Battery True",
+        "links": [
+            "3c674412.a3b2dc"
+        ],
+        "x": 675,
+        "y": 680,
+        "wires": [
+            [
+                "62a050ad.94645"
+            ]
+        ]
+    },
+    {
+        "id": "350356dd.86265a",
+        "type": "http request",
+        "z": "e46b79e5.cc0948",
+        "name": "Battery Data",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": true,
+        "url": "https://owner-api.teslamotors.com/oauth/token",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 570,
+        "y": 920,
+        "wires": [
+            [
+                "b7e81985.64eb98",
+                "5e9f5c6d.706084"
+            ]
+        ]
+    },
+    {
+        "id": "40651c25.7f2b74",
+        "type": "inject",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "repeat": "1728000",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 110,
+        "y": 920,
+        "wires": [
+            [
+                "df100e51.5bd02"
+            ]
+        ]
+    },
+    {
+        "id": "b7e81985.64eb98",
+        "type": "debug",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 810,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "df100e51.5bd02",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Enter Tesla Email and Password",
+        "func": "msg.headers = {};\nmsg.payload = {};\nmsg.headers[\"user-agent\"] = \"chrome\";\n\nmsg.payload[\"grant_type\"] = \"password\";\nmsg.payload[\"client_id\"] = \"81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384\";\nmsg.payload[\"client_secret\"] = \"c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3\";\nmsg.payload[\"email\"] = \"Email Here\";\nmsg.payload[\"password\"] = \"Password Here\";\n\n\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 330,
+        "y": 920,
+        "wires": [
+            [
+                "350356dd.86265a"
+            ]
+        ]
+    },
+    {
+        "id": "5e9f5c6d.706084",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "access_token",
+                "pt": "flow",
+                "to": "payload.access_token",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 960,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7e898dfe.8eb494",
+        "type": "comment",
+        "z": "e46b79e5.cc0948",
+        "name": "Get a Tesla Token every 15 days",
+        "info": "",
+        "x": 150,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "dda1d04b.20ec2",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "Make Msg",
+        "rules": [
+            {
+                "t": "set",
+                "p": "message",
+                "pt": "msg",
+                "to": "5 min spot price has spiked, battery will now be used. The price is [msg.payload.price]",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "title",
+                "pt": "msg",
+                "to": "Price Spike",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "battery",
+                "pt": "msg",
+                "to": "0",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 530,
+        "y": 1100,
+        "wires": [
+            [
+                "28e464e2.9a4e7c"
+            ]
+        ]
+    },
+    {
+        "id": "91909cab.96cde",
+        "type": "function",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Header to Token",
+        "func": "msg.headers = {};\nmsg.headers[\"user-agent\"] = \"paddy\";\nmsg.headers[\"Authorization\"] = \"bearer \" + flow.get('access_token');\nmsg.headers[\"Content-Type\"] = \"application/json\";\nmsg.payload = {};\nmsg.payload[\"backup_reserve_percent\"] = parseFloat(msg.battery);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 1040,
+        "y": 1100,
+        "wires": [
+            [
+                "95f1a7b3.eba928"
+            ]
+        ]
+    },
+    {
+        "id": "95f1a7b3.eba928",
+        "type": "http request",
+        "z": "e46b79e5.cc0948",
+        "name": "Battery Data",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": false,
+        "url": "https://owner-api.teslamotors.com/api/1/energy_sites/2607431/backup",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 1250,
+        "y": 1100,
+        "wires": [
+            [
+                "451a6c83.b190a4"
+            ]
+        ]
+    },
+    {
+        "id": "451a6c83.b190a4",
+        "type": "debug",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 1390,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "7ea8235d.0857ec",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "Make Msg",
+        "rules": [
+            {
+                "t": "set",
+                "p": "title",
+                "pt": "msg",
+                "to": "Price Dropped ",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "battery",
+                "pt": "msg",
+                "to": "Powerwall_SoC",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 530,
+        "y": 1160,
+        "wires": [
+            [
+                "62d1b88c.ed9818"
+            ]
+        ]
+    },
+    {
+        "id": "df3ac5c9.31f4d8",
+        "type": "link out",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "links": [
+            "c5dbbeb3.052b2",
+            "e5bfde0d.3c7b"
+        ],
+        "x": 895,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "44b563cb.0af5dc",
+        "type": "link in",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "links": [
+            "25bac47d.1efb3c"
+        ],
+        "x": 895,
+        "y": 1080,
+        "wires": [
+            [
+                "91909cab.96cde"
+            ]
+        ]
+    },
+    {
+        "id": "c57930be.283da",
+        "type": "link in",
+        "z": "e46b79e5.cc0948",
+        "name": "True/False Battery",
+        "links": [
+            "8ebccbdc.68e358",
+            "fba54538.d585c8"
+        ],
+        "x": 35,
+        "y": 1100,
+        "wires": [
+            [
+                "c1dfaf1.9053d5"
+            ]
+        ]
+    },
+    {
+        "id": "204bd343.ef35ec",
+        "type": "switch",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "property": "electricity_battery",
+        "propertyType": "global",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 350,
+        "y": 1160,
+        "wires": [
+            [
+                "dda1d04b.20ec2"
+            ],
+            [
+                "7ea8235d.0857ec"
+            ]
+        ]
+    },
+    {
+        "id": "54182b63.015be4",
+        "type": "rbe",
+        "z": "e46b79e5.cc0948",
+        "name": "changed vlaue?",
+        "func": "rbei",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "property": "payload",
+        "x": 340,
+        "y": 1100,
+        "wires": [
+            [
+                "204bd343.ef35ec"
+            ]
+        ]
+    },
+    {
+        "id": "c1dfaf1.9053d5",
+        "type": "change",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "price",
+                "pt": "msg",
+                "to": "payload[0].price",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "electricity_battery",
+                "tot": "global"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 160,
+        "y": 1100,
+        "wires": [
+            [
+                "54182b63.015be4"
+            ]
+        ]
+    },
+    {
+        "id": "28e464e2.9a4e7c",
+        "type": "template",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "field": "message",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "5 min spot price has spiked, battery will now be used. The price is {{msg.payload.price}}c",
+        "output": "str",
+        "x": 680,
+        "y": 1100,
+        "wires": [
+            [
+                "df3ac5c9.31f4d8",
+                "91909cab.96cde"
+            ]
+        ]
+    },
+    {
+        "id": "62d1b88c.ed9818",
+        "type": "template",
+        "z": "e46b79e5.cc0948",
+        "name": "",
+        "field": "message",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "Over last half hour prices have droped to {{msg.payload.price}}c, battery now in Standby",
+        "output": "str",
+        "x": 680,
+        "y": 1160,
+        "wires": [
+            [
+                "91909cab.96cde",
+                "df3ac5c9.31f4d8"
+            ]
+        ]
+    },
+    {
+        "id": "42ecb812.6f9638",
+        "type": "comment",
+        "z": "e46b79e5.cc0948",
+        "name": "Change Battery Reserve deppending if its cheaper to use the battery or grid.",
+        "info": "",
+        "x": 310,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "3d629759.40d838",
+        "type": "inject",
+        "z": "e46b79e5.cc0948",
+        "name": "Set Battery True",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 520,
+        "y": 660,
+        "wires": [
+            [
+                "62a050ad.94645"
+            ]
+        ]
+    }
+]
